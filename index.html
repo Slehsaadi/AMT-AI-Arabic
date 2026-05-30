@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AMT-AI — اختبار الذاكرة الذاتية بالتعليمات المتناوبة</title>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+
+
+        :root {
+
+            --ink: #0d1117;
+
+            --paper: #f9f7f2;
+
+            --rule: #d4cfc4;
+
+            --accent: #1a3a5c;
+
+            --accent2: #b5451b;
+
+            --highlight: #e8e2d5;
+
+            --positive: #1b5e20;
+
+            --warn: #7f3e00;
+
+            --timer-track: #ddd8ce;
+
+            --font-ar: 'Noto Naskh Arabic', serif;
+
+            --font-mono: 'IBM Plex Mono', monospace;
+
+            --radius: 4px;
+
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+
+        }
+
+
+
+        *, *::before, *::after {
+
+            box-sizing: border-box;
+
+            margin: 0;
+
+            padding: 0;
+
+        }
+
+
+
+        body {
+
+            font-family: var(--font-ar);
+
+            background: var(--paper);
+
+            color: var(--ink);
+
+            min-height: 100vh;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+        }
+
+
+
+        /* ── HEADER ─────────────────────────────────── */
+
+        .app-header {
+
+            width: 100%;
+
+            background: var(--accent);
+
+            color: #fff;
+
+            padding: 12px 32px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 16px;
+
+        }
+
+        .app-header h1 {
+
+            font-size: 1.05rem;
+
+            font-weight: 700;
+
+            line-height: 1.3;
+
+        }
+
+        .app-header p {
+
+            font-size: 0.72rem;
+
+            opacity: 0.72;
+
+            direction: ltr;
+
+            text-align: right;
+
+            margin: 0;
+
+        }
+
+        .header-badge {
+
+            font-family: var(--font-mono);
+
+            font-size: 0.62rem;
+
+            background: rgba(255,255,255,0.14);
+
+            border: 1px solid rgba(255,255,255,0.24);
+
+            border-radius: var(--radius);
+
+            padding: 4px 10px;
+
+            letter-spacing: 0.08em;
+
+            white-space: nowrap;
+
+        }
+
+
+
+        /* ── SCREENS ─────────────────────────────────── */
+
+        .screen {
+
+            display: none;
+
+            width: 100%;
+
+            max-width: 780px;
+
+            margin: 0 auto;
+
+            padding: 32px 24px 64px;
+
+            animation: fadeIn 0.32s ease;
+
+        }
+
+        .screen.active {
+
+            display: block;
+
+        }
+
+        @keyframes fadeIn {
+
+            from { opacity:0; transform:translateY(7px); }
+
+            to { opacity:1; transform:none; }
+
+        }
+
+
+
+        /* ── CARDS ───────────────────────────────────── */
+
+        .card {
+
+            background: #fff;
+
+            border: 1px solid var(--rule);
+
+            border-radius: var(--radius);
+
+            box-shadow: var(--shadow);
+
+            padding: 28px 32px;
+
+            margin-bottom: 20px;
+
+        }
+
+        .card h2 {
+
+            font-size: 1.1rem;
+
+            font-weight: 700;
+
+            color: var(--accent);
+
+            border-bottom: 2px solid var(--accent);
+
+            padding-bottom: 8px;
+
+            margin-bottom: 18px;
+
+        }
+
+
+
+        /* ── TYPOGRAPHY ──────────────────────────────── */
+
+        p {
+
+            line-height: 1.75;
+
+            font-size: 0.95rem;
+
+            margin-bottom: 10px;
+
+        }
+
+        .label-sm {
+
+            font-size: 0.74rem;
+
+            font-family: var(--font-mono);
+
+            letter-spacing: 0.06em;
+
+            color: #666;
+
+            text-transform: uppercase;
+
+            margin-bottom: 6px;
+
+            display: block;
+
+            direction: ltr;
+
+        }
+
+        hr.div {
+
+            border: none;
+
+            border-top: 1px solid var(--rule);
+
+            margin: 20px 0;
+
+        }
+
+        .center {
+
+            text-align: center;
+
+        }
+
+        .text-muted {
+
+            color: #888;
+
+            font-size: 0.8rem;
+
+        }
+
+
+
+        /* ── FORM ────────────────────────────────────── */
+
+        .form-row {
+
+            margin-bottom: 18px;
+
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+
+            width: 100%;
+
+            font-family: var(--font-ar);
+
+            font-size: 0.95rem;
+
+            border: 1px solid var(--rule);
+
+            border-radius: var(--radius);
+
+            padding: 9px 12px;
+
+            background: var(--paper);
+
+            color: var(--ink);
+
+            transition: border-color 0.15s;
+
+            direction: rtl;
+
+        }
+
+        input:focus, select:focus, textarea:focus {
+
+            outline: none;
+
+            border-color: var(--accent);
+
+            background: #fff;
+
+        }
+
+        textarea {
+
+            resize: vertical;
+
+            min-height: 70px;
+
+        }
+
+        .grid-2 {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 16px;
+
+        }
+
+
+
+        /* ── BUTTONS ─────────────────────────────────── */
+
+        .btn {
+
+            display: inline-block;
+
+            font-family: var(--font-ar);
+
+            font-size: 0.95rem;
+
+            font-weight: 600;
+
+            padding: 11px 28px;
+
+            border-radius: var(--radius);
+
+            border: none;
+
+            cursor: pointer;
+
+            transition: all 0.18s;
+
+            text-align: center;
+
+        }
+
+        .btn-primary {
+
+            background: var(--accent);
+
+            color: #fff;
+
+        }
+
+        .btn-primary:hover {
+
+            background: #122b47;
+
+        }
+
+        .btn-secondary {
+
+            background: transparent;
+
+            color: var(--accent);
+
+            border: 1.5px solid var(--accent);
+
+        }
+
+        .btn-secondary:hover {
+
+            background: var(--highlight);
+
+        }
+
+        .btn-danger {
+
+            background: var(--accent2);
+
+            color: #fff;
+
+        }
+
+        .btn-danger:hover {
+
+            background: #8e3210;
+
+        }
+
+        .btn-success {
+
+            background: var(--positive);
+
+            color: #fff;
+
+        }
+
+        .btn-success:hover {
+
+            background: #144d18;
+
+        }
+
+        .btn:disabled {
+
+            opacity: 0.4;
+
+            cursor: not-allowed;
+
+        }
+
+        .btn-row {
+
+            display: flex;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+
+            justify-content: center;
+
+            margin-top: 24px;
+
+        }
+
+
+
+        /* ── INFO BOXES ──────────────────────────────── */
+
+        .info-box {
+
+            background: #edf2f7;
+
+            border-right: 4px solid var(--accent);
+
+            border-radius: var(--radius);
+
+            padding: 14px 18px;
+
+            margin-bottom: 16px;
+
+            font-size: 0.9rem;
+
+            line-height: 1.7;
+
+        }
+
+        .info-box.warn {
+
+            background: #fef3e2;
+
+            border-right-color: #e65100;
+
+        }
+
+        .info-box.success {
+
+            background: #e8f5e9;
+
+            border-right-color: var(--positive);
+
+        }
+
+
+
+        /* ── DEF TABLE ─────────── */
+
+        .def-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            font-size: 0.88rem;
+
+        }
+
+        .def-table th {
+
+            background: var(--accent);
+
+            color: #fff;
+
+            padding: 8px 14px;
+
+            text-align: right;
+
+            font-weight: 600;
+
+        }
+
+        .def-table td {
+
+            padding: 9px 14px;
+
+            border-bottom: 1px solid var(--rule);
+
+            vertical-align: top;
+
+            line-height: 1.65;
+
+        }
+
+        .def-table tr:last-child td {
+
+            border-bottom: none;
+
+        }
+
+        .def-table tr:nth-child(even) td {
+
+            background: var(--highlight);
+
+        }
+
+        .tag-spec {
+
+            display:inline-block;
+
+            background:#1a3a5c;
+
+            color:#fff;
+
+            font-size:0.7rem;
+
+            padding:2px 8px;
+
+            border-radius:20px;
+
+            font-weight:600;
+
+        }
+
+        .tag-gen {
+
+            display:inline-block;
+
+            background:var(--accent2);
+
+            color:#fff;
+
+            font-size:0.7rem;
+
+            padding:2px 8px;
+
+            border-radius:20px;
+
+            font-weight:600;
+
+        }
+
+
+
+        /* ══════════════════════════════════════════════ STIMULUS SCREEN ══════════════════════════════════════════════ */
+
+        #screen-stimulus {
+
+            text-align: center;
+
+        }
+
+        /* Progress bar (top) */
+
+        .prog-outer {
+
+            width: 100%;
+
+            height: 5px;
+
+            background: var(--timer-track);
+
+            border-radius: 3px;
+
+            overflow: hidden;
+
+            margin-bottom: 36px;
+
+        }
+
+        .prog-inner {
+
+            height: 100%;
+
+            background: var(--accent);
+
+            border-radius: 3px;
+
+            transition: width 0.4s linear;
+
+        }
+
+        /* Phase badge */
+
+        .phase-badge {
+
+            display: inline-block;
+
+            font-family: var(--font-mono);
+
+            font-size: 0.64rem;
+
+            letter-spacing: 0.1em;
+
+            padding: 4px 12px;
+
+            border-radius: 20px;
+
+            margin-bottom: 28px;
+
+            font-weight: 600;
+
+        }
+
+        .phase-badge.practice {
+
+            background:#fff3e0;
+
+            color:#bf360c;
+
+            border:1px solid #ffe0b2;
+
+        }
+
+        .phase-badge.main {
+
+            background:#e3eaf3;
+
+            color:var(--accent);
+
+            border:1px solid #c5d5e8;
+
+        }
+
+        /* Instruction */
+
+        .instr-line {
+
+            font-size: 1.1rem;
+
+            font-weight: 600;
+
+            color: var(--accent);
+
+            margin-bottom: 10px;
+
+            line-height: 1.6;
+
+        }
+
+        .instr-badge {
+
+            display: inline-block;
+
+            padding: 6px 22px;
+
+            border-radius: 20px;
+
+            font-size: 0.9rem;
+
+            font-weight: 700;
+
+            margin-bottom: 32px;
+
+        }
+
+        .instr-badge.spec {
+
+            background: #1a3a5c;
+
+            color: #fff;
+
+        }
+
+        .instr-badge.gen {
+
+            background: var(--accent2);
+
+            color: #fff;
+
+        }
+
+        /* Stimulus word */
+
+        .stim-word {
+
+            font-size: 4rem;
+
+            font-weight: 700;
+
+            color: var(--ink);
+
+            margin: 16px 0 44px;
+
+            line-height: 1.15;
+
+            opacity: 1;
+
+            transition: opacity 0.38s ease;
+
+        }
+
+        .stim-word.out {
+
+            opacity: 0;
+
+        }
+
+
+
+        /* ── EXAMINER PANEL ──────── */
+
+        .examiner-panel {
+
+            background: var(--paper);
+
+            border: 1.5px dashed var(--rule);
+
+            border-radius: var(--radius);
+
+            padding: 16px 20px;
+
+            text-align: right;
+
+            margin-bottom: 16px;
+
+        }
+
+        .examiner-panel .panel-label {
+
+            font-size: 0.7rem;
+
+            font-family: var(--font-mono);
+
+            letter-spacing: 0.08em;
+
+            color: #888;
+
+            margin-bottom: 10px;
+
+            display: block;
+
+            direction: ltr;
+
+            text-transform: uppercase;
+
+        }
+
+        .examiner-panel textarea {
+
+            min-height: 72px;
+
+            font-size: 0.9rem;
+
+            margin-bottom: 10px;
+
+        }
+
+        .coding-row {
+
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            justify-content: center;
+
+        }
+
+        .code-btn {
+
+            padding: 7px 18px;
+
+            font-family: var(--font-ar);
+
+            font-size: 0.82rem;
+
+            font-weight: 600;
+
+            border-radius: 20px;
+
+            border: 1.5px solid transparent;
+
+            cursor: pointer;
+
+            transition: all 0.14s;
+
+            background: var(--highlight);
+
+            color: var(--ink);
+
+        }
+
+        .code-btn:hover {
+
+            border-color: var(--accent);
+
+        }
+
+        .code-btn.sel-S {
+
+            background:#1a3a5c;
+
+            color:#fff;
+
+            border-color:#1a3a5c;
+
+        }
+
+        .code-btn.sel-G {
+
+            background:var(--accent2);
+
+            color:#fff;
+
+            border-color:var(--accent2);
+
+        }
+
+        .code-btn.sel-F {
+
+            background:#555;
+
+            color:#fff;
+
+            border-color:#555;
+
+        }
+
+        .code-btn.sel-O {
+
+            background:#6a1b9a;
+
+            color:#fff;
+
+            border-color:#6a1b9a;
+
+        }
+
+        /* word counter */
+
+        .word-ctr {
+
+            display: none;
+
+        }
+
+
+
+        /* ── RESULTS SCREEN ══════════════════════════════════════════════ */
+
+        .section-title {
+
+            font-size: 0.74rem;
+
+            font-weight: 700;
+
+            color: var(--accent);
+
+            margin: 20px 0 10px;
+
+            letter-spacing: 0.07em;
+
+            font-family: var(--font-mono);
+
+            direction: ltr;
+
+            text-transform: uppercase;
+
+        }
+
+        /* Stat cards */
+
+        .stat-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(148px,1fr));
+
+            gap: 12px;
+
+            margin-bottom: 24px;
+
+        }
+
+        .stat-card {
+
+            background: var(--highlight);
+
+            border: 1px solid var(--rule);
+
+            border-radius: var(--radius);
+
+            padding: 15px 10px;
+
+            text-align: center;
+
+        }
+
+        .stat-val {
+
+            font-size: 2rem;
+
+            font-weight: 700;
+
+            line-height: 1;
+
+            color: var(--accent);
+
+            font-family: var(--font-mono);
+
+        }
+
+        .stat-val.warn {
+
+            color: var(--accent2);
+
+        }
+
+        .stat-lbl {
+
+            font-size: 0.73rem;
+
+            color: #555;
+
+            margin-top: 5px;
+
+            line-height: 1.4;
+
+        }
+
+        /* Valence grid */
+
+        .val-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(3,1fr);
+
+            gap: 12px;
+
+            margin-bottom: 24px;
+
+        }
+
+        .val-card {
+
+            border: 1px solid var(--rule);
+
+            border-radius: var(--radius);
+
+            padding: 13px 8px;
+
+            text-align: center;
+
+            background: #fff;
+
+        }
+
+        .val-title {
+
+            font-size: 0.76rem;
+
+            font-weight: 700;
+
+            margin-bottom: 8px;
+
+            color: #444;
+
+        }
+
+        .val-row {
+
+            display: flex;
+
+            justify-content: space-around;
+
+        }
+
+        .val-num {
+
+            font-family: var(--font-mono);
+
+            font-size: 1.1rem;
+
+            font-weight: 700;
+
+        }
+
+        /* Results table */
+
+        .tbl-wrap {
+
+            overflow-x: auto;
+
+        }
+
+        .res-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            font-size: 0.81rem;
+
+            direction: rtl;
+
+        }
+
+        .res-table th {
+
+            background: var(--accent);
+
+            color: #fff;
+
+            padding: 8px 10px;
+
+            text-align: right;
+
+            white-space: nowrap;
+
+        }
+
+        .res-table td {
+
+            padding: 7px 10px;
+
+            border-bottom: 1px solid var(--rule);
+
+            vertical-align: top;
+
+            line-height: 1.5;
+
+        }
+
+        .res-table tr:nth-child(even) td {
+
+            background: var(--highlight);
+
+        }
+
+        /* Chips */
+
+        .chip {
+
+            display:inline-block;
+
+            padding:2px 8px;
+
+            border-radius:20px;
+
+            font-size:0.68rem;
+
+            font-weight:700;
+
+        }
+
+        .cS { background:#1a3a5c; color:#fff; }
+
+        .cG { background:var(--accent2); color:#fff; }
+
+        .cF { background:#555; color:#fff; }
+
+        .cO { background:#6a1b9a; color:#fff; }
+
+        .cPrac { background:#e65100; color:#fff; }
+
+        .cMain { background:#1a3a5c; color:#fff; }
+
+
+
+        /* ── RESPONSIVE ──────────────────────────────── */
+
+        @media (max-width:600px) {
+
+            .grid-2 { grid-template-columns: 1fr; }
+
+            .stim-word { font-size: 2.8rem; }
+
+            .card { padding: 18px 14px; }
+
+            .app-header { padding: 10px 14px; }
+
+            .val-grid { grid-template-columns: 1fr; }
+
+        }
+
+        /* ── PRINT ───────────────────────────────────── */
+
+        @media print {
+
+            .btn, .btn-row { display:none !important; }
+
+            #screen-participant, #screen-instructions, #screen-practice-start, #screen-test-start, #screen-stimulus { display:none !important; }
+
+            #screen-results { display:block !important; }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <!-- ═══════════ HEADER ═══════════ -->
+
+    <header class="app-header">
+
+        <div>
+
+            <h1>اختبار الذاكرة الذاتية بالتعليمات المتناوبة (AMT-AI)</h1>
+
+            <p>النسخة التونسية العربية المحوسبة — Computerized Tunisian Arabic AMT-AI — Adaptation: Saadi, 2026</p>
+
+        </div>
+
+        <div class="header-badge">AMT-AI v1.0</div>
+
+    </header>
+
+
+
+    <!-- ═══════════ SCREEN 1 : PARTICIPANT ═══════════ -->
+
+    <div id="screen-participant" class="screen active">
+
+        <div class="card">
+
+            <h2>بيانات المشارك</h2>
+
+            <div class="grid-2">
+
+                <div class="form-row">
+
+                    <span class="label-sm">Participant ID *</span>
+
+                    <input type="text" id="p-id" placeholder="مثال: P001">
+
+                </div>
+
+                <div class="form-row">
+
+                    <span class="label-sm">Examiner / الفاحص</span>
+
+                    <input type="text" id="p-examiner" placeholder="اسم الفاحص">
+
+                </div>
+
+                <div class="form-row">
+
+                    <span class="label-sm">Age / العمر</span>
+
+                    <input type="number" id="p-age" min="16" max="100" placeholder="مثال: 34">
+
+                </div>
+
+                <div class="form-row">
+
+                    <span class="label-sm">Gender / الجنس</span>
+
+                    <select id="p-gender">
+
+                        <option value="">— اختر —</option>
+
+                        <option value="M">ذكر</option>
+
+                        <option value="F">أنثى</option>
+
+                        <option value="NA">تفضيل عدم الإفصاح</option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-row">
+
+                    <span class="label-sm">Education / التعليم</span>
+
+                    <select id="p-edu">
+
+                        <option value="">— اختر —</option>
+
+                        <option>ابتدائي</option>
+
+                        <option>متوسط</option>
+
+                        <option>ثانوي</option>
+
+                        <option>جامعي</option>
+
+                        <option>دراسات عليا</option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-row">
+
+                    <span class="label-sm">Condition / المجموعة</span>
+
+                    <input type="text" id="p-cond" placeholder="مثال: اكتئاب / ضبط">
+
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <span class="label-sm">Notes / ملاحظات</span>
+
+                <textarea id="p-notes" placeholder="ملاحظات أولية حول المشارك"></textarea>
+
+            </div>
+
+            <hr class="div">
+
+            <div class="form-row">
+
+                <span class="label-sm">Word Order / ترتيب الكلمات</span>
+
+                <select id="p-order">
+
+                    <option value="A">النسخة أ</option>
+
+                    <option value="B">النسخة ب — Counterbalanced</option>
+
+                </select>
+
+            </div>
+
+            <div class="btn-row">
+
+                <button class="btn btn-primary" onclick="goInstr()">التالي: التعليمات ←</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ═══════════ SCREEN 2 : INSTRUCTIONS ═══════════ -->
+
+    <div id="screen-instructions" class="screen">
+
+        <div class="card">
+
+            <h2>تعليمات الاختبار</h2>
+
+            <div class="info-box">
+
+                <strong>للفاحص:</strong> اقرأ التعليمات التالية بصوت واضح للمشارك وتأكّد من فهمه قبل الانتقال إلى التدريب.
+
+            </div>
+
+            <p><strong>سيُعرض عليك خلال هذا الاختبار عددٌ من الكلمات، الواحدة تلو الأخرى.</strong></p>
+
+            <p>مع كل كلمة، ستُطلب منك <strong>ذكرى</strong> من ذاكرتك الشخصية مرتبطة بهذه الكلمة. نوع الذكرى المطلوبة سيظهر بوضوح على الشاشة في كل مرة.</p>
+
+            <hr class="div">
+
+            <table class="def-table">
+
+                <thead>
+
+                    <tr><th>نوع الذكرى</th><th>التعريف</th><th>مثال</th></tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td><span class="tag-spec">ذكرى محددة</span></td>
+
+                        <td>حدث واحد وقع في <strong>وقت ومكان محدّدَين</strong>، لم يستمر أكثر من يوم واحد.</td>
+
+                        <td>«ذهبتُ إلى البحر مع صديقي أحمد صباح يوم الجمعة الماضي، وكان الجو باردًا.»</td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td><span class="tag-gen">ذكرى تصنيفية</span></td>
+
+                        <td>نمط أو تكرار من الأحداث المعتادة، <strong>دون تحديد وقت أو مكان بعينه</strong>.</td>
+
+                        <td>«كنتُ كثيرًا ما أذهب مع أصدقائي إلى المقاهي أيام الإجازة.»</td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+            <hr class="div">
+
+            <div class="info-box warn">
+
+                <strong>قواعد مهمة:</strong><br>
+
+                ◈ استجب <strong>شفهيًا</strong> في أقرب وقت ممكن.<br>
+
+                ◈ إذا تعذّر عليك التذكّر، قل «لا أتذكّر» وانتظر حتى تتغيّر الكلمة تلقائياً.<br>
+
+                ◈ يجب أن تكون الذكريات <strong>شخصية وحقيقية</strong> من حياتك أنت.<br>
+
+                ◈ لا توجد إجابات صحيحة أو خاطئة — المهم الصدق والتلقائية.
+
+            </div>
+
+            <div class="btn-row">
+
+                <button class="btn btn-secondary" onclick="go('screen-participant')">← عودة</button>
+
+                <button class="btn btn-primary" onclick="go('screen-practice-start')">فهمتُ — ابدأ التدريب ←</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ═══════════ SCREEN 3 : PRACTICE START ═══════════ -->
+
+    <div id="screen-practice-start" class="screen">
+
+        <div class="card center">
+
+            <h2>تجربة التدريب</h2>
+
+            <p>ستُعرض عليك الآن <strong>كلمات تدريبية</strong> للتأكد من فهمك للتعليمات.</p>
+
+            <p>يمكن للفاحص التوقف وتقديم ملاحظات أثناء هذه المرحلة.</p>
+
+            <div class="info-box" style="text-align:right">
+
+                ستنتقل الكلمة تلقائياً بعد مدة كافية. استجب شفهياً في أقرب وقت ممكن.
+
+            </div>
+
+            <div class="btn-row">
+
+                <button class="btn btn-primary" onclick="startPhase('practice')">▶ ابدأ التدريب</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ═══════════ SCREEN 4 : TEST START ═══════════ -->
+
+    <div id="screen-test-start" class="screen">
+
+        <div class="card center">
+
+            <h2>الاختبار الرئيسي</h2>
+
+            <div class="info-box success" style="text-align:right">
+
+                انتهت مرحلة التدريب بنجاح. سيبدأ الاختبار الفعلي الآن.<br>
+
+                <strong>لن يتوقف الاختبار إلا بعد عرض جميع الكلمات.</strong>
+
+            </div>
+
+            <div class="btn-row">
+
+                <button class="btn btn-primary" onclick="startPhase('main')">▶ ابدأ الاختبار الرئيسي</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ═══════════ SCREEN 5 : STIMULUS ═══════════ -->
+
+    <div id="screen-stimulus" class="screen">
+
+        <div style="max-width:640px; margin:0 auto;">
+
+            <!-- meta row -->
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+
+                <span id="phase-badge" class="phase-badge practice">تدريب / PRATIQUE</span>
+
+                <span id="word-ctr" class="word-ctr"></span>
+
+            </div>
+
+            <!-- overall progress bar -->
+
+            <div class="prog-outer">
+
+                <div id="prog-bar" class="prog-inner" style="width:0%"></div>
+
+            </div>
+
+            <!-- instruction -->
+
+            <div class="instr-line" id="instr-line">اذكر ذكرى محددة مرتبطة بالكلمة:</div>
+
+            <div>
+
+                <span id="instr-badge" class="instr-badge spec">ذكرى محددة</span>
+
+            </div>
+
+            <!-- stimulus word -->
+
+            <div id="stim-word" class="stim-word">—</div>
+
+
+
+            <!-- examiner panel -->
+
+            <div class="examiner-panel">
+
+                <span class="panel-label">Examiner — Coding &amp; Response Recording</span>
+
+                <textarea id="resp-txt" placeholder="اكتب ما قاله المشارك هنا (اختياري)..."></textarea>
+
+                <div class="coding-row">
+
+                    <button class="code-btn" data-c="S" onclick="setCode(this,'S')">✦ ذكرى محددة</button>
+
+                    <button class="code-btn" data-c="G" onclick="setCode(this,'G')">◉ ذكرى تصنيفية</button>
+
+                    <button class="code-btn" data-c="F" onclick="setCode(this,'F')">✕ فشل / لا يتذكر</button>
+
+                    <button class="code-btn" data-c="O" onclick="setCode(this,'O')">? استجابة أخرى</button>
+
+                </div>
+
+            </div>
+
+            <!-- nav -->
+
+            <div class="btn-row">
+
+                <button class="btn btn-secondary" onclick="nextWord(true)">تخطّي ←</button>
+
+                <button class="btn btn-primary" onclick="nextWord(false)">تسجيل والانتقال ←</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ═══════════ SCREEN 6 : RESULTS ═══════════ -->
+
+    <div id="screen-results" class="screen">
+
+        <div class="card">
+
+            <h2>نتائج الاختبار — ورقة التسجيل</h2>
+
+            <div id="res-pinfo" class="info-box" style="margin-bottom:20px;"></div>
+
+            <div class="section-title">Main Indices / المؤشرات الرئيسية</div>
+
+            <div class="stat-grid" id="stat-grid"></div>
+
+            <div class="section-title">Valence Breakdown / التوزيع الوجداني</div>
+
+            <div class="val-grid" id="val-grid"></div>
+
+            <hr class="div">
+
+            <div class="section-title">Detailed Results / النتائج التفصيلية</div>
+
+            <div class="tbl-wrap">
+
+                <table class="res-table" id="res-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>المرحلة</th>
+
+                            <th>الكلمة</th>
+
+                            <th>الوجدان</th>
+
+                            <th>التعليمة</th>
+
+                            <th>الكود</th>
+
+                            <th>الزمن (ث)</th>
+
+                            <th>الاستجابة</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="res-tbody"></tbody>
+
+                </table>
+
+            </div>
+
+            <div class="btn-row" style="margin-top:32px;">
+
+                <button class="btn btn-success" onclick="exportXLSX()">⬇ تصدير Excel</button>
+
+                <button class="btn btn-secondary" onclick="window.print()">🖨 طباعة</button>
+
+                <button class="btn btn-danger" onclick="resetAll()">✕ اختبار جديد</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ═══════════ JAVASCRIPT ═══════════ -->
+
+    <script>
+
+        /* ══════════════════════════════════════════════ WORD LISTS ══════════════════════════════════════════════ */
+
+        const WORDS_BASE = [
+
+            // Neutral (8)
+
+            { ar:'لقب', valence:'neu' },
+
+            { ar:'مكتبة', valence:'neu' },
+
+            { ar:'حلّ', valence:'neu' },
+
+            { ar:'غامض', valence:'neu' },
+
+            { ar:'ممارسة', valence:'neu' },
+
+            { ar:'بحر', valence:'neu' },
+
+            { ar:'طفل', valence:'neu' },
+
+            { ar:'روح', valence:'neu' },
+
+
+
+            // Negative (8)
+
+            { ar:'خائف', valence:'neg' },
+
+            { ar:'غاضب', valence:'neg' },
+
+            { ar:'فشل', valence:'neg' },
+
+            { ar:'وحيد', valence:'neg' },
+
+            { ar:'قَلِق', valence:'neg' },
+
+            { ar:'حزين', valence:'neg' },
+
+            { ar:'يائس', valence:'neg' },
+
+            { ar:'آسِف', valence:'neg' },
+
+
+
+            // Positive (8)
+
+            { ar:'آمن', valence:'pos' },
+
+            { ar:'ناجح', valence:'pos' },
+
+            { ar:'مُتفاجئ', valence:'pos' },
+
+            { ar:'سعيد', valence:'pos' },
+
+            { ar:'هادئ', valence:'pos' },
+
+            { ar:'مفعم بالطاقة', valence:'pos' },
+
+            { ar:'مرتاح', valence:'pos' },
+
+            { ar:'محبوب', valence:'pos' },
+
+        ];
+
+
+
+        const PRACTICE_WORDS = [
+
+            { ar:'ماء', valence:'neu' }, { ar:'سفر', valence:'pos' }, { ar:'عمل', valence:'neu' },
+
+        ];
+
+
+
+        /* Assign alternating instruction types */
+
+        function assignInstr(list, startWithS) {
+
+            return list.map((w, i) => ({
+
+                ...w,
+
+                instrType: ((i % 2 === 0) === startWithS) ? 'S' : 'G'
+
+            }));
+
+        }
+
+
+
+        /* Simple shuffle */
+
+        function shuffle(arr) {
+
+            const a = [...arr];
+
+            for (let i = a.length - 1; i > 0; i--) {
+
+                const j = Math.floor(Math.random() * (i + 1));
+
+                [a[i], a[j]] = [a[j], a[i]];
+
+            }
+
+            return a;
+
+        }
+
+
+
+        /* ══════════════════════════════════════════════ STATE ══════════════════════════════════════════════ */
+
+        const TIMER_DURATION = 60; // seconds — background tracking active
+
+        let participant = {};
+
+        let practiceWords = [];
+
+        let mainWords = [];
+
+        let allTrials = []; // logged results
+
+        let currentPhase = 'practice'; // 'practice' | 'main'
+
+        let currentList = [];
+
+        let currentIdx = 0;
+
+        let currentCode = null;
+
+        let trialStartTime = null;
+
+        let autoAdvTimer = null;
+
+
+
+        /* ══════════════════════════════════════════════ NAVIGATION ══════════════════════════════════════════════ */
+
+        function go(screenId) {
+
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
+            document.getElementById(screenId).classList.add('active');
+
+        }
+
+
+
+        function goInstr() {
+
+            const pid = document.getElementById('p-id').value.trim();
+
+            if (!pid) {
+
+                alert('الرجاء إدخال معرّف المشارك (Participant ID).');
+
+                return;
+
+            }
+
+            participant = {
+
+                id: pid,
+
+                examiner: document.getElementById('p-examiner').value.trim(),
+
+                age: document.getElementById('p-age').value,
+
+                gender: document.getElementById('p-gender').value,
+
+                edu: document.getElementById('p-edu').value,
+
+                cond: document.getElementById('p-cond').value.trim(),
+
+                notes: document.getElementById('p-notes').value.trim(),
+
+                order: document.getElementById('p-order').value,
+
+                date: new Date().toISOString(),
+
+            };
+
+            go('screen-instructions');
+
+        }
+
+
+
+        /* ══════════════════════════════════════════════ PHASE SETUP ══════════════════════════════════════════════ */
+
+        function startPhase(phase) {
+
+            currentPhase = phase;
+
+            if (phase === 'practice') {
+
+                currentList = assignInstr(PRACTICE_WORDS, true);
+
+            } else {
+
+                const startS = participant.order === 'B' ? false : true;
+
+                currentList = assignInstr(shuffle(WORDS_BASE), startS);
+
+            }
+
+            currentIdx = 0;
+
+            allTrials = allTrials.filter(t => t.phase !== phase);
+
+            go('screen-stimulus');
+
+            showWord();
+
+        }
+
+
+
+        /* ══════════════════════════════════════════════ STIMULUS DISPLAY ══════════════════════════════════════════════ */
+
+        function showWord() {
+
+            if (currentIdx >= currentList.length) {
+
+                endPhase();
+
+                return;
+
+            }
+
+            const trial = currentList[currentIdx];
+
+            currentCode = null;
+
+            document.getElementById('resp-txt').value = '';
+
+            document.querySelectorAll('.code-btn').forEach(b => b.className = 'code-btn');
+
+
+
+            // Phase badge
+
+            const pb = document.getElementById('phase-badge');
+
+            if (currentPhase === 'practice') {
+
+                pb.textContent = 'تدريب / PRATIQUE';
+
+                pb.className = 'phase-badge practice';
+
+            } else {
+
+                pb.textContent = 'اختبار / TEST';
+
+                pb.className = 'phase-badge main';
+
+            }
+
+
+
+            // Progress
+
+            const total = currentList.length;
+
+            document.getElementById('prog-bar').style.width = ((currentIdx / total) * 100) + '%';
+
+
+
+            // Instruction
+
+            const ib = document.getElementById('instr-badge');
+
+            const il = document.getElementById('instr-line');
+
+            if (trial.instrType === 'S') {
+
+                il.textContent = 'اذكر ذكرى محددة مرتبطة بالكلمة:';
+
+                ib.textContent = 'ذكرى محددة';
+
+                ib.className = 'instr-badge spec';
+
+            } else {
+
+                il.textContent = 'اذكر ذكرى تصنيفية مرتبطة بالكلمة:';
+
+                ib.textContent = 'ذكرى تصنيفية';
+
+                ib.className = 'instr-badge gen';
+
+            }
+
+
+
+            // Word — fade out then in
+
+            const sw = document.getElementById('stim-word');
+
+            sw.classList.add('out');
+
+            setTimeout(() => {
+
+                sw.textContent = trial.ar;
+
+                sw.classList.remove('out');
+
+            }, 380);
+
+
+
+            trialStartTime = Date.now();
+
+            if (autoAdvTimer) clearTimeout(autoAdvTimer);
+
+            autoAdvTimer = setTimeout(() => nextWord(true), TIMER_DURATION * 1000);
+
+        }
+
+
+
+        function setCode(btn, code) {
+
+            currentCode = code;
+
+            document.querySelectorAll('.code-btn').forEach(b => {
+
+                b.className = 'code-btn';
+
+            });
+
+            btn.classList.add('sel-' + code);
+
+        }
+
+
+
+        function nextWord(skipped) {
+
+            if (autoAdvTimer) clearTimeout(autoAdvTimer);
+
+            const elapsed = trialStartTime ? ((Date.now() - trialStartTime) / 1000).toFixed(1) : null;
+
+            const trial = currentList[currentIdx];
+
+            allTrials.push({
+
+                phase: currentPhase,
+
+                idx: currentIdx + 1,
+
+                word: trial.ar,
+
+                valence: trial.valence,
+
+                instrType: trial.instrType,
+
+                code: skipped ? (currentCode || 'F') : (currentCode || '—'),
+
+                rt: elapsed,
+
+                response: document.getElementById('resp-txt').value.trim(),
+
+                skipped: skipped
+
+            });
+
+            currentIdx++;
+
+            showWord();
+
+        }
+
+
+
+        function endPhase() {
+
+            if (currentPhase === 'practice') {
+
+                go('screen-test-start');
+
+            } else {
+
+                buildResults();
+
+                go('screen-results');
+
+            }
+
+        }
+
+
+
+        /* ══════════════════════════════════════════════ RESULTS ══════════════════════════════════════════════ */
+
+        function buildResults() {
+
+            const mainTrials = allTrials.filter(t => t.phase === 'main');
+
+
+
+            // Participant info
+
+            document.getElementById('res-pinfo').innerHTML =
+
+                `<strong>ID:</strong> ${participant.id} &nbsp;|&nbsp; <strong>الفاحص:</strong> ${participant.examiner || '—'} &nbsp;|&nbsp; ` +
+
+                `<strong>العمر:</strong> ${participant.age || '—'} &nbsp;|&nbsp; <strong>الجنس:</strong> ${participant.gender || '—'} &nbsp;|&nbsp; ` +
+
+                `<strong>التعليم:</strong> ${participant.edu || '—'} &nbsp;|&nbsp; <strong>المجموعة:</strong> ${participant.cond || '—'} &nbsp;|&nbsp; ` +
+
+                `<strong>التاريخ:</strong> ${new Date(participant.date).toLocaleString('ar-TN')}`;
+
+
+
+            // Stats
+
+            const total = mainTrials.length;
+
+            const spec = mainTrials.filter(t => t.code === 'S').length;
+
+            const gen  = mainTrials.filter(t => t.code === 'G').length;
+
+            const fail = mainTrials.filter(t => t.code === 'F').length;
+
+            const other= mainTrials.filter(t => t.code === 'O').length;
+
+            const rts  = mainTrials.filter(t => t.rt).map(t => parseFloat(t.rt));
+
+            const avgRT = rts.length ? (rts.reduce((a,b)=>a+b,0)/rts.length).toFixed(1) : '—';
+
+            const sSpec = mainTrials.filter(t => t.instrType==='S' && t.code==='S').length;
+
+            const gGen  = mainTrials.filter(t => t.instrType==='G' && t.code==='G').length;
+
+            const sTotal= mainTrials.filter(t => t.instrType==='S').length;
+
+            const gTotal= mainTrials.filter(t => t.instrType==='G').length;
+
+
+
+            document.getElementById('stat-grid').innerHTML = [
+
+                { val: total, lbl: 'Total Trials' },
+
+                { val: spec,  lbl: 'Specific (S)' },
+
+                { val: gen,   lbl: 'Categorical (G)' },
+
+                { val: fail,  lbl: 'Failure (F)', warn: true },
+
+                { val: other, lbl: 'Other (O)' },
+
+                { val: avgRT + 's', lbl: 'Avg RT' },
+
+                { val: sTotal ? ((sSpec/sTotal)*100).toFixed(0)+'%' : '—', lbl: 'Compliance S-instr' },
+
+                { val: gTotal ? ((gGen/gTotal)*100).toFixed(0)+'%' : '—', lbl: 'Compliance G-instr' },
+
+            ].map(s => `<div class="stat-card"><div class="stat-val ${s.warn?'warn':''}">${s.val}</div><div class="stat-lbl">${s.lbl}</div></div>`).join('');
+
+
+
+            // Valence breakdown
+
+            ['pos','neg','neu'].forEach(v => {
+
+                const vTrials = mainTrials.filter(t => t.valence === v);
+
+                const vS = vTrials.filter(t=>t.code==='S').length;
+
+                const vG = vTrials.filter(t=>t.code==='G').length;
+
+                const vF = vTrials.filter(t=>t.code==='F').length;
+
+                const label = v==='pos'?'إيجابي':v==='neg'?'سلبي':'محايد';
+
+                document.getElementById('val-grid').innerHTML += `
+
+                    <div class="val-card">
+
+                        <div class="val-title">${label}</div>
+
+                        <div class="val-row">
+
+                            <div><div class="val-num" style="color:#1a3a5c">${vS}</div><div style="font-size:0.65rem">S</div></div>
+
+                            <div><div class="val-num" style="color:var(--accent2)">${vG}</div><div style="font-size:0.65rem">G</div></div>
+
+                            <div><div class="val-num" style="color:#555">${vF}</div><div style="font-size:0.65rem">F</div></div>
+
+                        </div>
+
+                    </div>`;
+
+            });
+
+
+
+            // Detailed table
+
+            const tbody = document.getElementById('res-tbody');
+
+            tbody.innerHTML = '';
+
+            allTrials.forEach((t, i) => {
+
+                const codeChip = t.code !== '—' ? `<span class="chip c${t.code}">${t.code}</span>` : '—';
+
+                const phaseChip = `<span class="chip c${t.phase==='practice'?'Prac':'Main'}">${t.phase==='practice'?'تدريب':'اختبار'}</span>`;
+
+                const valLabel = t.valence==='pos'?'إيجابي':t.valence==='neg'?'سلبي':'محايد';
+
+                const instrChip = `<span class="chip c${t.instrType}">${t.instrType==='S'?'محددة':'تصنيفية'}</span>`;
+
+                tbody.innerHTML += `<tr>
+
+                    <td>${i+1}</td>
+
+                    <td>${phaseChip}</td>
+
+                    <td style="font-size:1rem;font-weight:700">${t.word}</td>
+
+                    <td>${valLabel}</td>
+
+                    <td>${instrChip}</td>
+
+                    <td>${codeChip}</td>
+
+                    <td style="font-family:var(--font-mono)">${t.rt || '—'}</td>
+
+                    <td style="font-size:0.78rem;max-width:200px">${t.response || '—'}</td>
+
+                </tr>`;
+
+            });
+
+        }
+
+
+
+        /* ══════════════════════════════════════════════ EXPORT ══════════════════════════════════════════════ */
+
+        function exportXLSX() {
+
+            const wb = XLSX.utils.book_new();
+
+
+
+            // Sheet 1: Participant info
+
+            const pRows = [
+
+                ['Field','Value'],
+
+                ['ID', participant.id],
+
+                ['Examiner', participant.examiner],
+
+                ['Age', participant.age],
+
+                ['Gender', participant.gender],
+
+                ['Education', participant.edu],
+
+                ['Condition', participant.cond],
+
+                ['Notes', participant.notes],
+
+                ['Order', participant.order],
+
+                ['Date', participant.date],
+
+            ];
+
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(pRows), 'Participant');
+
+
+
+            // Sheet 2: Trials
+
+            const headers = ['#','Phase','Word','Valence','Instruction','Code','RT_s','Response','Skipped'];
+
+            const rows = allTrials.map((t,i) => [
+
+                i+1, t.phase, t.word, t.valence, t.instrType, t.code, t.rt, t.response, t.skipped?1:0
+
+            ]);
+
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers,...rows]), 'Trials');
+
+
+
+            XLSX.writeFile(wb, `AMT-AI_${participant.id}_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+        }
+
+
+
+        /* ══════════════════════════════════════════════ RESET ══════════════════════════════════════════════ */
+
+        function resetAll() {
+
+            if (!confirm('هل تريد بدء اختبار جديد؟ ستُفقد جميع البيانات الحالية.')) return;
+
+            allTrials = [];
+
+            participant = {};
+
+            document.getElementById('val-grid').innerHTML = '';
+
+            go('screen-participant');
+
+        }
+
+    </script>
+
+</body>
+
+</html>
